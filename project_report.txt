@@ -1,0 +1,693 @@
+PROJECT REPORT (DRAFT)
+
+Project Title: GIGSPACE — Freelance Marketplace Platform
+Developed By: [Your Name]
+Registration No.: [Your Reg. No.]
+Institution: [Your Institution]
+Course: [Your Course]
+Supervisor: [Supervisor Name]
+Academic Year: 2025/2026
+Submission Date: [Date]
+
+--------------------------------------------------------------------
+
+ABSTRACT
+
+GigSpace is a web-based freelance marketplace platform that connects clients who need services with freelancers who provide those services. The system supports the two core user roles—clients and freelancers—and provides end-to-end workflows such as project posting, bidding, hiring, order management, and communication through an integrated messaging system. The platform also supports freelancer gigs (direct service offers), profile management, skill and category browsing, file uploads, and dashboard-based user experiences.
+
+The application is implemented using PHP and MySQL (XAMPP environment) with session-based authentication. Database persistence is achieved with a relational schema defined in gigspace.sql. The system uses server-side page rendering with modular components and AJAX-style process endpoints for actions like placing bids, accepting/rejecting proposals, sending messages, retrieving conversations, and managing order status.
+
+This report documents the project motivation, requirements, system design, database structure, implementation approach, testing plan, security considerations, challenges encountered, and proposed future improvements.
+
+--------------------------------------------------------------------
+
+TABLE OF CONTENTS
+
+1. Introduction
+2. Problem Statement
+3. Objectives (General and Specific)
+4. Scope and Limitations
+5. Methodology / Development Approach
+6. Literature Review
+7. System Analysis
+   7.1 Existing Solutions and Their Limitations
+   7.2 Proposed Solution
+8. System Design
+   8.1 High-Level Architecture
+   8.2 Functional Modules
+   8.3 Use of User Roles and Navigation Model
+9. Requirements
+   9.1 Functional Requirements
+   9.2 Non-Functional Requirements
+10. Database Design
+   10.1 Database Overview
+   10.2 Entity Descriptions (Tables)
+   10.3 Relationships and Constraints
+11. Implementation
+   11.1 Technology Stack
+   11.2 Key Application Flow
+   11.3 Important Endpoints and Their Responsibilities
+12. Security Considerations
+13. Testing and Results
+   13.1 Testing Strategy
+   13.2 Representative Test Cases (Functional)
+   13.3 Test Results Summary
+14. Challenges Faced
+15. Future Improvements
+16. Conclusion
+17. References
+
+--------------------------------------------------------------------
+
+1. INTRODUCTION
+
+Freelancing has become one of the fastest-growing alternatives to traditional employment, enabling individuals and organizations to source specialist services remotely. Freelance platforms reduce effort by centralizing service discovery, facilitating agreement workflows, and providing communication tools.
+
+GigSpace is designed as a practical student/academic-scale freelance marketplace application, with a focus on providing a realistic workflow rather than a simple CRUD application. The system aims to support a complete transaction lifecycle: clients post projects, freelancers bid or offer gigs, an order is created, both parties communicate and share delivery items, and the process can end with completion and review.
+
+The application runs on a local XAMPP environment using PHP and MySQL. It supports media-rich user profiles (images), messaging threads linked to orders, and skill-based discovery.
+
+--------------------------------------------------------------------
+
+2. PROBLEM STATEMENT
+
+Many freelance marketplace systems are either too complex, expensive to implement, or missing essential workflow features such as:
+
+- Structured bidding and hiring flows
+- Order tracking and delivery management
+- Integrated messaging tied to hiring transactions
+- Skill/category discovery and role-based dashboards
+- Persistent relational data modeling that supports real workflows
+
+In addition, for academic learning and prototyping, developers need a system architecture and documentation that demonstrate real engineering practices: database normalization, role-based security, and clear separation between view pages and processing endpoints.
+
+Therefore, GigSpace addresses the need for a complete, realistic freelance marketplace prototype with well-defined requirements, database structure, and end-to-end user workflows.
+
+--------------------------------------------------------------------
+
+3. OBJECTIVES
+
+3.1 General Objective
+
+To design and develop a functional freelance marketplace platform that supports clients and freelancers with end-to-end workflows including project posting, bidding, hiring, order management, and communication.
+
+3.2 Specific Objectives
+
+- Implement session-based authentication with role management (client and freelancer).
+- Enable clients to create projects with categories, budgets, and deadlines.
+- Enable freelancers to create gigs and to bid on projects with proposals and delivery time.
+- Implement bid acceptance/rejection leading to order creation.
+- Implement an order lifecycle that supports delivery notes/files and status updates.
+- Implement messaging per order through conversations and message retrieval.
+- Implement freelancer profile management including image upload and skills association.
+- Provide dashboards for each role to visualize relevant information.
+- Ensure persistent storage via a normalized MySQL database schema.
+
+--------------------------------------------------------------------
+
+4. SCOPE AND LIMITATIONS
+
+4.1 Scope
+
+GigSpace includes the following core capabilities:
+
+- Client and freelancer registration and login
+- Role-based dashboards
+- Profile viewing and freelancer discovery (featured freelancers)
+- Project posting and browsing
+- Gigs browsing and purchasing/ordering (direct service flow)
+- Bidding on projects (place/accept/reject)
+- Order creation and status updates
+- Messaging threads linked to orders
+- Basic attachments support (generic attachments table)
+- Newsletter subscription mechanism
+
+4.2 Limitations (Prototype Level)
+
+- Payment functionality is represented by order status (“paid”) but may not integrate real payment gateways.
+- Real-time chat is handled using repeated retrieval/AJAX-like calls rather than WebSockets.
+- Admin panel is not fully expanded in the prototype.
+- Security is improved for academic needs, but production hardening (CSRF tokens, rate limiting, strict escaping, secure upload scanning) would still be needed.
+
+--------------------------------------------------------------------
+
+5. METHODOLOGY / DEVELOPMENT APPROACH
+
+GigSpace is built using a structured approach that combines:
+
+- Requirement-driven implementation (functional workflows mapped to database tables)
+- Relational database design (normalized tables for users, profiles, projects, bids, orders, conversations, messages, gigs)
+- Modular server-side PHP pages and process endpoints
+- Session-based authentication and role-based routing logic
+- Incremental development: build user auth → profiles → gigs/projects → bidding → orders → messaging
+
+--------------------------------------------------------------------
+
+6. LITERATURE REVIEW
+
+Freelance marketplaces have reshaped remote work by enabling clients to discover service providers and by providing structured workflows for negotiation and delivery.
+
+Common capabilities found in modern platforms include:
+
+- Service discovery using categories, skills, and ratings
+- Proposal/bid-based hiring models
+- Transaction/order lifecycle management
+- Secure communication (often per order)
+- Reputation mechanisms such as reviews and ratings
+
+Academic and industry work on online marketplaces emphasizes that usability and trust are strongly influenced by:
+
+- Transparent workflows
+- Data integrity and consistent states (e.g., bid accepted → order created)
+- Clear communication channels
+- Feedback loops (reviews/ratings)
+
+GigSpace focuses on building a simplified but realistic version of these marketplace concepts for demonstration and academic assessment. Rather than using a heavy framework, it uses procedural PHP and direct MySQL operations to keep the system understandable and observable during development.
+
+--------------------------------------------------------------------
+
+7. SYSTEM ANALYSIS
+
+7.1 Existing Solutions and Their Limitations
+
+Typical existing systems (e.g., large freelance platforms) offer many features, but they can be:
+
+- Expensive and complex to replicate
+- Over-engineered for academic use
+- Hard to document as a clear learning artifact
+- Not directly portable to local environments for testing
+
+Additionally, some beginner implementations stop at CRUD pages, lacking transaction lifecycle reasoning.
+
+7.2 Proposed Solution
+
+GigSpace proposes a structured freelance marketplace prototype with:
+
+- Two user roles (client, freelancer)
+- Relational modeling of projects, bids, and orders
+- Messaging per transaction
+- Dashboards tailored by role
+- Skill/category discovery and profile media support
+
+The focus is on building a complete workflow that demonstrates engineering thinking and database-driven application behavior.
+
+--------------------------------------------------------------------
+
+8. SYSTEM DESIGN
+
+8.1 High-Level Architecture
+
+GigSpace follows a web application structure with:
+
+- Presentation layer: PHP page templates (root pages and dashboards)
+- Logic layer: process endpoints under /process that handle AJAX-style requests or POST actions
+- Data layer: MySQL database accessed via mysqli in config/db_config.php
+
+File-based routing is used: individual PHP files are served as endpoints (e.g., index.php, hire.php, projects.php, order.php, freelancers.php).
+
+8.2 Functional Modules
+
+The system can be separated into modules:
+
+A) Authentication & User Management
+- Registration for clients and freelancers
+- Login/logout
+- Session-based user_id and role tracking
+
+B) Profiles and Skills
+- Public profiles via view_freelancer.php
+- Profile images stored in dashboards/uploads/profile/
+- Skill association using freelancer_skills join table
+
+C) Project & Gig Discovery
+- Categories and skills browsing
+- Featured freelancers section on the homepage
+
+D) Bidding Workflow (Client Projects)
+- Place bid: process/place_bid.php
+- Accept bid: process/accept_bid.php
+- Reject bid: process/reject_bid.php
+
+E) Order Lifecycle
+- Order created after bid acceptance or gig hiring
+- Order status updates (including delivery stages)
+- Delivery note/file support
+
+F) Messaging System
+- Conversations per order
+- Message sending: process/send_message.php
+- Message retrieval: process/get_messages.php
+- Unread count retrieval: process/get_unread_count.php
+
+G) Delivery/Submission & Status Update
+- Delivery submission: process/submit_work.php
+- Update order/project status: process/update_project_status.php
+
+H) Subscription
+- Newsletter subscription: process/subscribe.php
+
+8.3 User Roles and Navigation Model
+
+- Clients access client dashboards: projects, gigs browsing, messages, orders, profile
+- Freelancers access freelancer dashboards: gigs, projects, messages, earnings, profile
+
+Navigation and page access depend on role checks using $_SESSION.
+
+--------------------------------------------------------------------
+
+9. REQUIREMENTS
+
+9.1 Functional Requirements
+
+Clients must be able to:
+
+- Register and login
+- Create a project with category, budget range, deadline, and description
+- Browse projects (for own management and potentially search)
+- View bids on their projects
+- Accept or reject freelancer bids
+- Hire freelancers through order creation
+- View and manage their orders
+- Send and receive messages with freelancers per order
+- View their profile
+
+Freelancers must be able to:
+
+- Register and login
+- Set up freelancer profile details (title, experience level, etc.)
+- Upload profile image
+- Manage skills associated with the freelancer
+- Create gigs (category, title, description, price, delivery time)
+- Browse projects and place bids with proposals and delivery time
+- Accept order requirements after hire
+- Submit work/delivery items
+- Receive and respond to messages per order
+- View earnings related to completed orders
+
+System must support:
+
+- Bid management and status transitions
+- Order management and status transitions
+- Conversation and message storage linked to orders
+- Unread message count retrieval
+- File upload persistence
+
+9.2 Non-Functional Requirements
+
+Security
+- Protect endpoints using role and session checks
+- Prevent unauthorized access to other users’ data
+- Sanitize output to reduce XSS
+- Validate upload files and handle safe file naming
+
+Performance
+- Use efficient SQL queries for common dashboard views
+- Load featured freelancers with a limited query (top 5)
+
+Reliability
+- Use database constraints and foreign keys where defined
+
+Usability
+- Responsive UI design for common pages
+- Clear dashboard layout for each role
+
+Maintainability
+- Use modular templates (header/footer/components)
+- Use dedicated process endpoints for actions
+
+--------------------------------------------------------------------
+
+10. DATABASE DESIGN
+
+10.1 Database Overview
+
+GigSpace uses a relational MySQL database defined in gigspace.sql. The database is normalized into tables representing:
+
+- Authentication users
+- Public profiles
+- Freelancer-specific profiles
+- Skills and category taxonomy
+- Projects, bids, gigs, orders
+- Conversations and messages
+- Reviews and attachments
+
+10.2 Entity Descriptions (Tables)
+
+The primary entities are:
+
+1) users
+- Stores username, email, password hash, role (client/freelancer)
+- Tracks account state (is_active, is_verified)
+
+2) profiles
+- Stores full_name, phone_number, profile_image, bio, country, university
+- Linked to users.user_id
+
+3) freelancer_profiles
+- Extends freelancer users with title, experience_level, rating, total_reviews, completed_orders
+
+4) skills
+- Skill catalog
+
+5) freelancer_skills
+- Join table mapping freelancer_profiles to skills
+
+6) categories
+- Job categories (e.g., Web Development, Graphic Design)
+
+7) projects
+- Client project postings including budget_min/budget_max, deadline, status
+
+8) gigs
+- Freelancer direct services with price, delivery_time, revisions, status
+
+9) bids
+- Proposals placed by freelancers on projects with amount, proposal, delivery_time, status
+
+10) orders
+- Transaction representation that includes either gig_id or project_id
+- Holds requirements, delivery notes/file urls, total_price, status, timestamps, paid_at
+
+11) conversations
+- Represents chat threads linked to orders
+
+12) messages
+- Represents individual messages inside conversations
+- Includes message_type and optional attachment_url and is_read flag
+
+13) reviews
+- Reviews per order with rating and comment
+
+14) gig_images
+- Images attached to gigs
+
+15) attachments
+- Generic attachments linked to users, using related_type/related_id fields
+
+16) subscribers
+- Stores newsletter emails
+
+10.3 Relationships and Constraints
+
+The schema includes foreign keys such as:
+
+- profiles.user_id → users.id
+- freelancer_profiles.user_id → users.id
+- freelancer_skills.freelancer_id → freelancer_profiles.id
+- freelancer_skills.skill_id → skills.id
+- projects.client_id → users.id
+- bids.project_id → projects.id (cascade delete)
+- bids.freelancer_id → freelancer_profiles.id (cascade delete)
+- orders.gig_id/projects_id/client_id/freelancer_id reference their respective entities
+- conversations.order_id → orders.id (cascade delete)
+- messages.conversation_id → conversations.id
+
+These constraints ensure referential integrity for core entities, supporting predictable workflow states.
+
+--------------------------------------------------------------------
+
+11. IMPLEMENTATION
+
+11.1 Technology Stack
+
+- Backend: PHP (procedural), sessions for authentication
+- Database: MySQL (MariaDB compatible), mysqli extension
+- Frontend: HTML5/CSS3 (PHP-included styling), responsive UI
+- JavaScript: used for AJAX interactions and dynamic updates (where applicable)
+- Server: Apache via XAMPP on Windows 11
+
+Project configuration:
+- config/init.php: session_start and initialization
+- config/db_config.php: MySQL connection credentials
+
+11.2 Key Application Flow
+
+A) Registration and Login
+1. User submits signup form through components/signup*.php
+2. Server hashes password and stores in users table
+3. If freelancer, create freelancer profile record
+4. Redirect user to authenticated pages
+
+B) Freelancer Profile & Skills
+1. Freelancer uploads profile image into dashboards/uploads/profile/
+2. Skills selected are stored via freelancer_skills join table
+3. Public profile becomes available for clients
+
+C) Client Project Posting
+1. Client creates a project using hire.php and process/create_project.php
+2. The project is stored in projects table
+
+D) Bidding
+1. Freelancer browses projects and places a bid using process/place_bid.php
+2. Bid saved into bids table with proposal and delivery time
+
+E) Accepting/Rejecting Bids
+1. Client accepts bid: process/accept_bid.php
+2. On acceptance, an order is created (orders table)
+3. If rejected, bid status changes to rejected using process/reject_bid.php
+
+F) Order and Messaging
+1. Messages are stored in messages table linked through conversations and order_id
+2. Client and freelancer dashboards display conversation history
+3. Unread counts are retrieved using process/get_unread_count.php
+
+G) Delivery and Completion
+1. Freelancer submits work via process/submit_work.php
+2. Order status updates (e.g., delivered/completed)
+3. Optional review creation in reviews table
+
+11.3 Important Endpoints and Their Responsibilities
+
+- /process/create_project.php
+  Handles project creation form data and stores in projects.
+
+- /process/place_bid.php
+  Stores a new bid record linked to project_id and freelancer_id.
+
+- /process/accept_bid.php
+  Changes bid status to accepted and creates corresponding order and conversation.
+
+- /process/reject_bid.php
+  Changes bid status to rejected.
+
+- /process/send_message.php
+  Inserts messages associated with a conversation.
+
+- /process/get_messages.php
+  Returns conversation messages for UI rendering.
+
+- /process/get_unread_count.php
+  Returns the number of unread messages for a user’s conversations.
+
+- /process/submit_work.php
+  Stores delivery content such as delivery_file_url or delivery_note.
+
+- /process/update_project_status.php
+  Updates order/project workflow states.
+
+- /process/subscribe.php
+  Adds email to subscribers table.
+
+--------------------------------------------------------------------
+
+12. SECURITY CONSIDERATIONS
+
+This section identifies key areas relevant to a marketplace platform.
+
+Authentication & Authorization
+- Session-based authentication controls access to dashboards and actions.
+- Role checking prevents clients from accessing freelancer-only workflows.
+
+SQL Injection
+- The prototype uses mysqli_* operations; prepared statements would be required for production.
+- Input validation should be applied before database queries.
+
+Cross-Site Scripting (XSS)
+- User-generated content such as proposals and messages must be escaped on output.
+
+File Upload Security
+- Uploaded profile/gig images are stored under dashboards/uploads.
+- A production version should implement:
+  - MIME/type validation
+  - Virus scanning (where possible)
+  - Safe extension allow-list
+  - Upload size limits
+  - Randomized file names to prevent overwriting
+
+CSRF and Rate Limiting
+- Production should include CSRF tokens for POST/PUT actions.
+- Rate limiting should be applied to login, message sending, and bid placement.
+
+Sensitive Data Handling
+- Database credentials in config/db_config.php must be secured and rotated if exposed.
+
+--------------------------------------------------------------------
+
+13. TESTING AND RESULTS
+
+13.1 Testing Strategy
+
+Testing approaches used for a prototype include:
+
+- Functional Testing
+  Verify each workflow step using real database records.
+
+- Integration Testing
+  Verify interactions between modules (projects → bids → orders → conversations).
+
+- Usability Testing
+  Verify dashboard navigation and responsiveness.
+
+- Security Testing (basic)
+  Verify that unauthorized users cannot access role-restricted pages.
+
+13.2 Representative Test Cases (Functional)
+
+Test Case 1: User Registration
+- Input: valid client data
+- Expected: new user in users table and redirect to dashboard
+
+Test Case 2: User Login
+- Input: correct email/password
+- Expected: session created and user dashboard loads
+
+Test Case 3: Create Project (Client)
+- Input: project title, category, budget_min/budget_max, description
+- Expected: record created in projects table
+
+Test Case 4: Place Bid (Freelancer)
+- Input: bid amount, proposal, delivery_time
+- Expected: bid created in bids table with status pending
+
+Test Case 5: Accept Bid
+- Input: select bid and accept
+- Expected: bid status accepted and order created in orders table
+
+Test Case 6: Reject Bid
+- Input: select bid and reject
+- Expected: bid status rejected and no order created
+
+Test Case 7: Send Message
+- Input: message text in an order conversation
+- Expected: message inserted and shown in receiver dashboard
+
+Test Case 8: Unread Count
+- Input: send message when receiver has not read it
+- Expected: get_unread_count returns incremented value
+
+Test Case 9: Upload Profile Image
+- Input: valid image file
+- Expected: file saved and profile image path stored
+
+Test Case 10: Submit Work
+- Input: delivery note or delivery file URL
+- Expected: updated order fields and status update
+
+13.3 Test Results Summary (Draft)
+
+- All core workflows (auth, project creation, bidding, bid acceptance, messaging) were validated in local XAMPP.
+- System behaved correctly for role-specific dashboard access.
+- Database relationships remained consistent after typical workflow actions.
+
+(You can add specific pass/fail logs from your testing session in the final version.)
+
+--------------------------------------------------------------------
+
+14. CHALLENGES FACED
+
+During development, the following challenges were encountered:
+
+1) Managing multi-table workflows
+- Ensuring correct order creation and conversation creation after bid acceptance.
+
+2) Role-based access and dashboard routing
+- Preventing clients from accessing freelancer-only pages and vice versa.
+
+3) Messaging consistency
+- Keeping conversation_id correct and ensuring unread logic updates properly.
+
+4) File upload handling
+- Ensuring image files are saved reliably and displayed correctly.
+
+5) Maintaining workflow state transitions
+- Updating order status values consistently (pending/paid/accepted/in_progress/delivered/completed).
+
+6) Prototype security hardening
+- Improving sanitation/escaping and strengthening authorization checks.
+
+--------------------------------------------------------------------
+
+15. FUTURE IMPROVEMENTS
+
+The following enhancements could upgrade GigSpace from prototype to production:
+
+- Payments Integration
+  - Implement Stripe/PayPal API for real escrow/payment.
+
+- Real-Time Messaging
+  - Use WebSockets (e.g., Socket.IO style) or server-sent events.
+
+- Admin Dashboard
+  - Add admin role for content moderation, disputes, and analytics.
+
+- Enhanced Security
+  - CSRF tokens, rate limiting, prepared statements, stronger upload scanning.
+
+- API Layer
+  - Convert process endpoints into a RESTful API or implement GraphQL.
+
+- Deployment Improvements
+  - Dockerize the application and deploy on cloud platforms.
+
+- Observability
+  - Add logging, monitoring, and error tracking.
+
+- Performance Optimization
+  - Index optimization, query refinement, caching.
+
+--------------------------------------------------------------------
+
+16. CONCLUSION
+
+GigSpace successfully demonstrates the development of a modern freelance marketplace platform capable of supporting project management, gigs, bidding workflows, hiring/orders, and communication through order-linked messaging. The system integrates multiple software engineering concepts including relational database management, role-based authentication, file handling for media uploads, dashboard-driven user experience, and workflow state transitions.
+
+Although the current version functions as a prototype within a local XAMPP environment, it establishes a solid foundation for future production upgrades. Future development can incorporate payment gateways, real-time communication, full admin governance, and additional security hardening.
+
+Overall, GigSpace provides a realistic and educational representation of how freelance marketplace systems work from both the data modeling and application workflow perspective.
+
+--------------------------------------------------------------------
+
+17. REFERENCES (DRAFT)
+
+1. Sommerville, I. Software Engineering (brief concepts for requirements, design, testing).
+2. Martin, R. Clean Architecture / Clean Code principles (maintainability).
+3. OWASP Top 10 — Web Application Security Risks (XSS, SQL injection, auth issues).
+4. MySQL Documentation (relational schema, indexes, constraints).
+
+(Replace with your institution-required reference style and add any additional academic sources used during your literature review.)
+
+--------------------------------------------------------------------
+
+APPENDIX (OPTIONAL)
+
+A) Project Directory Structure
+- Root PHP files (index.php, hire.php, projects.php, order.php, etc.)
+- /auth for authentication logic
+- /components for reusable signup/login components
+- /config for database and initialization
+- /dashboards for role-based user dashboards
+- /process for POST/AJAX action endpoints
+- /templates for header/footer
+- /images for static media assets
+- /dashboards/uploads for uploaded images
+
+B) How to Run
+1. Install XAMPP
+2. Start Apache and MySQL
+3. Create database gigspace in phpMyAdmin
+4. Import gigspace.sql
+5. Update config/db_config.php credentials
+6. Access: http://localhost/gigspace/
+
+END OF REPORT
+
