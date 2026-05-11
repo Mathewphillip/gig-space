@@ -136,5 +136,4 @@ Core files (80+ total, excluding images/uploads):
 - API (REST/GraphQL).
 - Docker/Deployment (Heroku/Vercel).
 
-**Contribute**: Fork, PR to `blackboxai/readme-update`.
 
