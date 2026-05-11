@@ -22,8 +22,8 @@ The platform supports roles for **clients** and **freelancers**, real-time unrea
 **DB Config** (`config/db_config.php`):
 ```php
 $hostname = 'localhost';
-$user = 'mathew';  // CHANGE IN PROD!
-$pwd = 'mathew123';  // CHANGE IN PROD!
+$user = 'root';  // CHANGE IN PROD!
+$pwd = '';  // CHANGE IN PROD!
 $database = 'gigspace';
 $conn = mysqli_connect($hostname, $user, $pwd, $database);
 ```
